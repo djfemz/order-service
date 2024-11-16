@@ -1,0 +1,13 @@
+syntax="proto3";
+
+Service order{
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse){};
+}
+
+message CreateOrderRequest{
+    
+}
+
+message CreateOrderResponse{
+
+}
