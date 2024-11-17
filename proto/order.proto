@@ -20,6 +20,7 @@ message CreateOrderResponse{
     string item=2;
     float price=3;
     string created_at=4;
+    Status status=5;
 }
 
 message GetUserRequest{
@@ -30,5 +31,11 @@ message UserResponse{
     int32 id=1;
     string username=2;
     string created_at=3;
+}
+
+enum Status{
+    FAILED=0;
+    PENDING=1;
+    SUCCESSFUL=2;
 }
 

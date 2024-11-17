@@ -25,8 +25,8 @@ func (orderService *OrderService) CreateOrder(ctx context.Context, orderRequest 
 }
 
 func (orderService *OrderService) GetUser(ctx context.Context, getOrderRequest *order.GetUserRequest) (*order.UserResponse, error){
-	orderService.logger.Info("In Create Order with request:: ", getOrderRequest)
-
+	orderService.logger.Info("In Get User with request:: ", getOrderRequest)
+	
 	return nil, nil
 }
 

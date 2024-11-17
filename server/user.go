@@ -14,7 +14,7 @@ type UserService struct {
 
 
 func (userService *UserService) GetUser(ctx context.Context, userRequest *user.UserRequest) (*user.UserResponse, error)  {
-	userService.logger.Info("[INFO::] In Get user for request: ", userRequest)
+	userService.logger.Info("In Get user for request: ", userRequest)
 	
 	return nil, nil
 }
