@@ -36,6 +36,6 @@ message UserResponse{
 enum Status{
     FAILED=0;
     PENDING=1;
-    SUCCESSFUL=2;
+    COMPLETE=2;
 }
 
