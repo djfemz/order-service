@@ -1,0 +1,8 @@
+package server
+
+import "testing"
+
+
+func TestGetUser(t *testing.T)  {
+	
+}

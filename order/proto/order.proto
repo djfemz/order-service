@@ -6,7 +6,7 @@ option go_package = "protos/order;order";
 
 service order{
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse){};
-    rpc GetUser(GetUserRequest) returns (UserResponse){};
+    rpc GetUser(GetUserRequest) returns (GetUserResponse){};
 }
 
 message CreateOrderRequest{
@@ -27,7 +27,7 @@ message GetUserRequest{
     int32 id =1;
 }
 
-message UserResponse{
+message GetUserResponse{
     int32 id=1;
     string username=2;
     string created_at=3;
