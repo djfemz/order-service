@@ -1,0 +1,68 @@
+version: "3.9"
+networks:
+  fullstack:
+    driver: bridge
+services:
+  order:
+    build:
+      context: .
+      dockerfile: ./order/Dockerfile
+    container_name: order
+    networks:
+      - fullstack
+    depends_on:
+      - order_db
+    env_file:
+      - .env
+    ports:
+      - '9002:9002'
+  # test:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: order:test
+  #   command: ["go", "test", "-v", "./api/controllers", "./api/services", "./api/repositories"] #edit this
+  user:
+    build:
+      context: .
+      dockerfile: ./user/Dockerfile
+    container_name: user
+    networks:
+      - fullstack
+    depends_on:
+      - user_db
+    env_file:
+      - .env
+    ports:
+      - '9001:9001'
+  order_db:
+    image: postgres:14-alpine
+    container_name: "order_db"
+    ports:
+      - "8085:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - database_dockerizing:/var/lib/postgresql/data
+      - ./dbshell:/docker-entrypoint-initdb.d/
+    networks:
+      - fullstack
+  user_db:
+    image: postgres:14-alpine
+    container_name: "user_db"
+    ports:
+      - "8085:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - database_dockerizing:/var/lib/postgresql/data
+      - ./dbshell:/docker-entrypoint-initdb.d/
+    networks:
+      - fullstack
+volumes:
+    database_dockerizing:
+    api_volume:
