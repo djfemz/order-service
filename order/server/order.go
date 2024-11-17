@@ -3,8 +3,9 @@ package server
 import (
 	"context"
 
-	"github.com/djfemz/grpc-store/order/proto/protos/order"
-	"github.com/djfemz/grpc-store/user/server"
+	"github.com/djfemz/order-service/proto/protos/order"
+	
+	"github.com/djfemz/user-service/server"
 	"github.com/sirupsen/logrus"
 )
 
