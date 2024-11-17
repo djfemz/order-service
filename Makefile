@@ -1,5 +1,5 @@
-.PHONY: protos;
+.PHONY: proto;
 
 protos:
-	protoc -I proto/ proto/order.proto --go_out=. --go-grpc_out=.;
-	protoc -I proto/ proto/user.proto --go_out=. --go-grpc_out=.;
+	protoc -I order/ proto/order.proto --go_out=./order/proto --go-grpc_out=./order/proto;
+	protoc -I user/ proto/user.proto --go_out=./user/proto --go-grpc_out=./user/proto;
