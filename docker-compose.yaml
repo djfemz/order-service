@@ -16,12 +16,6 @@ services:
       - .env
     ports:
       - '9002:9002'
-  # test:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   image: order:test
-  #   command: ["go", "test", "-v", "./api/controllers", "./api/services", "./api/repositories"] #edit this
   user:
     build:
       context: .

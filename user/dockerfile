@@ -9,7 +9,7 @@ COPY . .
 EXPOSE 9001
 
 WORKDIR /app/user
-# RUN go test -v ./api/controllers ./api/services ./api/repositories
+RUN go test -v ./server
 RUN go build -v -o main .
 
 

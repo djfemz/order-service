@@ -4,9 +4,12 @@ import (
 	"context"
 	"sync"
 
+	apperrors "github.com/djfemz/order-service/appErrors"
 	"github.com/djfemz/order-service/db"
 	"github.com/djfemz/order-service/models"
 	"github.com/djfemz/order-service/proto/protos/order"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/djfemz/user-service/proto/protos/user"
 	"github.com/sirupsen/logrus"
@@ -32,26 +35,51 @@ func (orderService *OrderService) CreateOrder(ctx context.Context, orderRequest 
 	var wg sync.WaitGroup
 	var userDetails *user.UserResponse
 	var err error
+	userDetailsCh := make(chan *user.UserResponse)
+	errorCh := make(chan error)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		userDetails, err = orderService.userClient.GetUser(ctx, &user.UserRequest{Id: orderRequest.UserId})
-		orderService.logger.Info("User found:: ", userDetails)
+		if err != nil {
+			orderService.logger.Error("Error fetching user :: ", err)
+			errorCh<-err
+		}
+		userDetailsCh<-userDetails
 	}()
-	wg.Wait()
-	if err != nil {
-		orderService.logger.Error("Error fetching user :: ", err)
+	go func() {
+		wg.Wait()
+		close(userDetailsCh)
+		close(errorCh)
+	}()
+	select {
+	case userDetails := <-userDetailsCh:
+		orderService.logger.Info("user found with details:: ", userDetails)
+	case err := <-errorCh:
+		err = status.Newf(codes.InvalidArgument, apperrors.INVALID_USER_ID_ERROR_MESSAGE, orderRequest.GetUserId(), err.Error()).Err()
+		return nil, err
 	}
 
+	newOrder, err := orderService.createOrder(orderRequest, err)
+	if err!=nil {
+		err = status.Newf(codes.InvalidArgument, apperrors.ORDER_CREATION_FAILED_MESSAGE, err.Error()).Err()
+		return &order.CreateOrderResponse{
+			Status: order.Status_FAILED,
+		}, err
+	}
+	return mapOrderToOrderResponse(newOrder, userDetails), nil
+}
+
+func (orderService *OrderService) createOrder(orderRequest *order.CreateOrderRequest, err error) (*models.Order, error) {
 	newOrder := models.NewOrder(orderRequest.Item, float64(orderRequest.Price))
 	newOrder, err = orderService.orderRepo.Save(newOrder)
 	if err != nil {
-		return nil, err
+		orderService.logger.Error("Error creating order for request:: ", orderRequest)
+		errorStatus := status.Newf(codes.InvalidArgument, apperrors.ORDER_CREATION_FAILED_MESSAGE, err.Error())
+		errorStatus, _ = errorStatus.WithDetails(orderRequest)
+		return nil, errorStatus.Err()
 	}
-	orderService.logger.Info("user: ", userDetails)
-	resp:=mapOrderToOrderResponse(newOrder, userDetails)
-	orderService.logger.Info("resp:: ", resp)
-	return resp, nil
+	return newOrder, nil
 }
 
 func (orderService *OrderService) GetUser(ctx context.Context, getUserRequest *order.GetUserRequest) (*order.GetUserResponse, error) {
@@ -74,15 +102,20 @@ func mapUserToUserResponse(user *user.UserResponse) *order.GetUserResponse {
 }
 
 func mapOrderToOrderResponse(createdOrder *models.Order, userDetails *user.UserResponse) *order.CreateOrderResponse {
-	return &order.CreateOrderResponse{
+	orderResponse := &order.CreateOrderResponse{
 		OrderId:   int32(createdOrder.Id),
 		Item:      createdOrder.Item,
 		Price:     float32(createdOrder.Price),
 		CreatedAt: createdOrder.CreatedAt,
-		CreatedBy: &order.GetUserResponse{
-			Id: userDetails.Id,
-			Username: userDetails.Username,
-		},
+		
 		Status:    order.Status_COMPLETE,
 	}
+
+	if userDetails != nil{
+		orderResponse.CreatedBy= &order.GetUserResponse{
+			Id: userDetails.Id,
+			Username: userDetails.Username,
+		}
+	}
+	return orderResponse
 }

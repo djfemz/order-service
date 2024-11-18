@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"os"
 
 	"github.com/djfemz/user-service/db"
 	"github.com/djfemz/user-service/proto/protos/user"
@@ -11,7 +12,13 @@ import (
 )
 
 func main() {
-	logger:=logrus.New()
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.JSONFormatter{})
+	file, err:=os.OpenFile("user_service.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err==nil{
+		logger.Level=logrus.ErrorLevel
+		logger.Out = file
+	}
 	listener, err:=net.Listen("tcp", ":9001")
 	if err!=nil{
 		logger.Error("Error listening on port:: ", 9001)

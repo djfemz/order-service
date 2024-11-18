@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"os"
 
 	"github.com/djfemz/order-service/db"
 	"github.com/djfemz/order-service/proto/protos/order"
@@ -12,11 +13,19 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+const port = ":9002"
+
 func main() {
 	logger := logrus.New()
-	listener, err := net.Listen("tcp", ":9002")
+	logger.SetFormatter(&logrus.JSONFormatter{})
+
+	file, err := os.OpenFile("order_service.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err == nil {
+		logger.Out = file
+	}
+	listener, err := net.Listen("tcp", port)
 	if err != nil {
-		logger.Error("Error listening on port:: ", 9002)
+		logger.Error("Error listening on port:: ", port)
 	}
 	grpcClient, err := grpc.NewClient("localhost:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

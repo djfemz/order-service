@@ -9,7 +9,7 @@ COPY . .
 EXPOSE 9002
 
 WORKDIR /app/order
-# RUN go test -v ./api/controllers ./api/services ./api/repositories
+RUN go test -v ./server
 RUN go build -v -o main .
 
 
