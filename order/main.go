@@ -34,6 +34,7 @@ func main() {
 	userClient := user.NewUserClient(grpcClient)
 	orderServer := grpc.NewServer()
 	order.RegisterOrderServer(orderServer, server.NewOrderService(logger, userClient, db.NewOrderRepository(logger)))
+	logger.Info("Starting order service...")
 	if err := orderServer.Serve(listener); err != nil {
 		logger.Error("error starting server:: ", err)
 	}

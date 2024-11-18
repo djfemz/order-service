@@ -32,7 +32,7 @@ func TestCreateOrder_Success(t *testing.T) {
 		CreatedAt:  "2024-11-11",
 	}, nil)
 	logger:=logrus.New()
-	orderService := &OrderService{logger:logger, userClient: mockUserClient, orderRepo: db.NewOrderRepository(logger)}
+	orderService := NewOrderService(logger, mockUserClient, db.NewOrderRepository(logger))
 	resp, err := orderService.CreateOrder(context.TODO(), &order.CreateOrderRequest{
 		UserId:  1,
 		Item: "Milk",
@@ -49,7 +49,7 @@ func TestCreateOrder_Invalid_UserId_Failure(t *testing.T) {
 	mockUserClient := &MockUserClient{}
 	mockUserClient.On("GetUser", mock.Anything, &user.UserRequest{Id: 12}).Return(&user.UserResponse{}, errors.New("user with id not found"))
 	logger:=logrus.New()
-	orderService := &OrderService{logger:logger, userClient: mockUserClient, orderRepo: db.NewOrderRepository(logger)}
+	orderService := NewOrderService(logger, mockUserClient, db.NewOrderRepository(logger))
 	resp, err := orderService.CreateOrder(context.TODO(), &order.CreateOrderRequest{
 		UserId:  12,
 		Item: "Milk",

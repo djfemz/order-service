@@ -16,7 +16,6 @@ func main() {
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	file, err:=os.OpenFile("user_service.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err==nil{
-		logger.Level=logrus.ErrorLevel
 		logger.Out = file
 	}
 	listener, err:=net.Listen("tcp", ":9001")
@@ -25,6 +24,7 @@ func main() {
 	}
 	userServer:=grpc.NewServer()
 	user.RegisterUserServer(userServer, server.NewUserService(logger, db.NewUserRepository(logger)))
+	logger.Info("Starting User service...")
 	if err:=userServer.Serve(listener);err!=nil{
 		logger.Error("error starting user server:: ", err)
 	}
