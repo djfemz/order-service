@@ -8,3 +8,10 @@ type Order struct{
 	CreatedAt string
 	Status string
 }
+
+func NewOrder(item string, price float64) *Order {
+	return &Order{
+		Item: item,
+		Price: price,
+	}
+}

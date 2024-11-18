@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/djfemz/order-service/models"
 	"github.com/sirupsen/logrus"
 )
@@ -23,6 +25,7 @@ func NewOrderRepository(logger *logrus.Logger) OrderRepository {
 
 func (orderRepo *OrderRepositoryImpl) Save(order *models.Order) (*models.Order, error) {
 	order.Id = uint64(len(orders) + 1)
+	order.CreatedAt=time.Now().String()
 	orders = append(orders, order)
 	orderRepo.logger.Info("adding new order:: ", order)
 	return order, nil

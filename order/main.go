@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"net"
 
 	"github.com/djfemz/order-service/db"
 	"github.com/djfemz/order-service/proto/protos/order"
@@ -14,16 +14,18 @@ import (
 
 func main() {
 	logger := logrus.New()
-	grpcClient, err:=grpc.NewClient("localhost:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err!= nil{
+	listener, err := net.Listen("tcp", ":9002")
+	if err != nil {
+		logger.Error("Error listening on port:: ", 9002)
+	}
+	grpcClient, err := grpc.NewClient("localhost:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
 		logger.Error("ERROR:: ", err)
 	}
-	userClient:=user.NewUserClient(grpcClient)
-	orderService:=server.NewOrderService(logger, userClient, db.NewOrderRepository(logger))
-	getUserRequest:= &order.GetUserRequest{Id: 3}
-	user, err:=orderService.GetUser(context.TODO(), getUserRequest)
-	if err!= nil{
-		logger.Error("ERROR:: ", err)
+	userClient := user.NewUserClient(grpcClient)
+	orderServer := grpc.NewServer()
+	order.RegisterOrderServer(orderServer, server.NewOrderService(logger, userClient, db.NewOrderRepository(logger)))
+	if err := orderServer.Serve(listener); err != nil {
+		logger.Error("error starting server:: ", err)
 	}
-	logger.Info("Found User:: ", user)
 }

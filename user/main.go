@@ -18,5 +18,7 @@ func main() {
 	}
 	userServer:=grpc.NewServer()
 	user.RegisterUserServer(userServer, server.NewUserService(logger, db.NewUserRepository(logger)))
-	userServer.Serve(listener)
+	if err:=userServer.Serve(listener);err!=nil{
+		logger.Error("error starting user server:: ", err)
+	}
 }

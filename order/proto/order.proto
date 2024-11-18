@@ -21,6 +21,7 @@ message CreateOrderResponse{
     float price=3;
     string created_at=4;
     Status status=5;
+    GetUserResponse created_by=6;
 }
 
 message GetUserRequest{
